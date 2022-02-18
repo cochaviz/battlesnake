@@ -86,21 +86,21 @@ func move(state GameState) BattlesnakeMoveResponse {
 		if myHead.Y == part.Y {
 			if myHead.X+1 == part.X {
 				possibleMoves["right"] = false
-				print("Cannot move right\n")
+				log.Print("Cannot move right\n")
 			}
 			if myHead.X-1 == part.X {
 				possibleMoves["left"] = false
-				print("Cannot move left\n")
+				log.Print("Cannot move left\n")
 			}
 		}
 		if myHead.X == part.X {
 			if myHead.Y+1 == part.Y {
 				possibleMoves["up"] = false
-				print("Cannot move up\n")
+				log.Print("Cannot move up\n")
 			}
 			if myHead.Y-1 == part.Y {
 				possibleMoves["down"] = false
-				print("Cannot move down\n")
+				log.Print("Cannot move down\n")
 			}
 		}
 	}
