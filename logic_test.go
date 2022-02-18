@@ -28,4 +28,24 @@ func TestNeckAvoidance(t *testing.T) {
 	}
 }
 
-// TODO: More GameState test cases!
+func TestBodyAvoidance(t *testing.T) {
+	// Arrange
+	me := Battlesnake{
+		Head: Coord{X: 8, Y: 1},
+		Body: []Coord{{X: 7, Y: 1}, {X: 7, Y: 0}, {X: 8, Y: 0}, {X: 9, Y: 0}},
+	}
+	state := GameState{
+		Board: Board{
+			Snakes: []Battlesnake{me},
+		},
+		You: me,
+	}
+	nextMove := move(state)
+	// Assert never move left
+	if nextMove.Move == "left" {
+		t.Errorf("snake moved onto its own neck, %s", nextMove.Move)
+	}
+	if nextMove.Move == "down" {
+		t.Errorf("snake moved onto its own body, %s", nextMove.Move)
+	}
+}

@@ -15,7 +15,7 @@ func info() BattlesnakeInfoResponse {
 	return BattlesnakeInfoResponse{
 		APIVersion: "1",
 		Author:     "cochaviz",
-		Color:      "#888888",
+		Color:      "#488A15",
 		Head:       "default",
 		Tail:       "default",
 	}
@@ -34,6 +34,10 @@ func end(state GameState) {
 	log.Printf("%s END\n\n", state.Game.ID)
 }
 
+func getNextMove(safeMoves []string, state GameState) string {
+	return safeMoves[rand.Intn(len(safeMoves))]
+}
+
 // This function is called on every turn of a game. Use the provided GameState to decide
 // where to move -- valid moves are "up", "down", "left", or "right".
 // We've provided some code and comments to get you started.
@@ -48,7 +52,7 @@ func move(state GameState) BattlesnakeMoveResponse {
 	myBody := state.You.Body
 	myHead := myBody[0]
 	myNeck := myBody[1]
-	myTail := myBody[1:]
+	myTail := myBody[2:]
 	boardWidth := state.Board.Width
 	boardHeight := state.Board.Height
 
@@ -79,17 +83,25 @@ func move(state GameState) BattlesnakeMoveResponse {
 
 	// Don't hit yourself.
 	for _, part := range myTail {
-		if myHead.X+1 == part.X {
-			possibleMoves["right"] = false
+		if myHead.Y == part.Y {
+			if myHead.X+1 == part.X {
+				possibleMoves["right"] = false
+				print("Cannot move right\n")
+			}
+			if myHead.X-1 == part.X {
+				possibleMoves["left"] = false
+				print("Cannot move left\n")
+			}
 		}
-		if myHead.X-1 == part.X {
-			possibleMoves["left"] = false
-		}
-		if myHead.Y+1 == part.Y {
-			possibleMoves["up"] = false
-		}
-		if myHead.Y-1 == part.Y {
-			possibleMoves["down"] = false
+		if myHead.X == part.X {
+			if myHead.Y+1 == part.Y {
+				possibleMoves["up"] = false
+				print("Cannot move up\n")
+			}
+			if myHead.Y-1 == part.Y {
+				possibleMoves["down"] = false
+				print("Cannot move down\n")
+			}
 		}
 	}
 
@@ -114,7 +126,7 @@ func move(state GameState) BattlesnakeMoveResponse {
 		nextMove = "down"
 		log.Printf("%s MOVE %d: No safe moves detected! Moving %s\n", state.Game.ID, state.Turn, nextMove)
 	} else {
-		nextMove = safeMoves[rand.Intn(len(safeMoves))]
+		nextMove = getNextMove(safeMoves, state)
 		log.Printf("%s MOVE %d: %s\n", state.Game.ID, state.Turn, nextMove)
 	}
 	return BattlesnakeMoveResponse{
