@@ -10,11 +10,6 @@ import (
 	"math/rand"
 )
 
-// This function is called when you register your Battlesnake on play.battlesnake.com
-// See https://docs.battlesnake.com/guides/getting-started#step-4-register-your-battlesnake
-// It controls your Battlesnake appearance and author permissions.
-// For customization options, see https://docs.battlesnake.com/references/personalization
-// TIP: If you open your Battlesnake URL in browser you should see this data.
 func info() BattlesnakeInfoResponse {
 	log.Println("INFO")
 	return BattlesnakeInfoResponse{
@@ -82,7 +77,22 @@ func move(state GameState) BattlesnakeMoveResponse {
 
 	// TODO: Step 2 - Don't hit yourself.
 	// Use information in GameState to prevent your Battlesnake from colliding with itself.
-	// mybody := state.You.Body
+	mybody := state.You.Body
+
+	for _, part := range mybody {
+		if myHead.X+1 == part.X {
+			possibleMoves["right"] = false
+		}
+		if myHead.X-1 == part.X {
+			possibleMoves["left"] = false
+		}
+		if myHead.Y+1 == part.Y {
+			possibleMoves["up"] = false
+		}
+		if myHead.Y-1 == part.Y {
+			possibleMoves["down"] = false
+		}
+	}
 
 	// TODO: Step 3 - Don't collide with others.
 	// Use information in GameState to prevent your Battlesnake from colliding with others.
