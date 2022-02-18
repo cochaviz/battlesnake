@@ -38,6 +38,31 @@ func getNextMove(safeMoves []string, state GameState) string {
 	return safeMoves[rand.Intn(len(safeMoves))]
 }
 
+func checkAround(possibleMoves map[string]bool, myHead Coord, otherBody []Coord) {
+	for _, part := range otherBody {
+		if myHead.Y == part.Y {
+			if myHead.X+1 == part.X {
+				possibleMoves["right"] = false
+				log.Print("Cannot move right\n")
+			}
+			if myHead.X-1 == part.X {
+				possibleMoves["left"] = false
+				log.Print("Cannot move left\n")
+			}
+		}
+		if myHead.X == part.X {
+			if myHead.Y+1 == part.Y {
+				possibleMoves["up"] = false
+				log.Print("Cannot move up\n")
+			}
+			if myHead.Y-1 == part.Y {
+				possibleMoves["down"] = false
+				log.Print("Cannot move down\n")
+			}
+		}
+	}
+}
+
 // This function is called on every turn of a game. Use the provided GameState to decide
 // where to move -- valid moves are "up", "down", "left", or "right".
 // We've provided some code and comments to get you started.
@@ -82,31 +107,12 @@ func move(state GameState) BattlesnakeMoveResponse {
 	}
 
 	// Don't hit yourself.
-	for _, part := range myTail {
-		if myHead.Y == part.Y {
-			if myHead.X+1 == part.X {
-				possibleMoves["right"] = false
-				log.Print("Cannot move right\n")
-			}
-			if myHead.X-1 == part.X {
-				possibleMoves["left"] = false
-				log.Print("Cannot move left\n")
-			}
-		}
-		if myHead.X == part.X {
-			if myHead.Y+1 == part.Y {
-				possibleMoves["up"] = false
-				log.Print("Cannot move up\n")
-			}
-			if myHead.Y-1 == part.Y {
-				possibleMoves["down"] = false
-				log.Print("Cannot move down\n")
-			}
-		}
-	}
+	checkAround(possibleMoves, myHead, myTail)
 
-	// TODO: Step 3 - Don't collide with others.
-	// Use information in GameState to prevent your Battlesnake from colliding with others.
+	// Don't hit others.
+	for _, others := range state.Board.Snakes {
+		checkAround(possibleMoves, myHead, others.Body)
+	}
 
 	// TODO: Step 4 - Find food.
 	// Use information in GameState to seek out and find food.
