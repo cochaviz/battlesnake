@@ -17,8 +17,8 @@ func info() BattlesnakeInfoResponse {
 		APIVersion: "1",
 		Author:     "cochaviz",
 		Color:      "#488A16",
-		Head:       "bolt",
-		Tail:       "safe",
+		Head:       "beluga",
+		Tail:       "curled",
 	}
 }
 
