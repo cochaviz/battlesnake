@@ -49,3 +49,12 @@ func TestBodyAvoidance(t *testing.T) {
 		t.Errorf("snake moved onto its own body, %s", nextMove.Move)
 	}
 }
+
+func TestManhattan(t *testing.T) {
+	a := Coord{X: 5, Y: 10}
+	b := Coord{X: 1, Y: 5}
+
+	if manHattanDistance(a, b) != 9 {
+		t.Errorf("manhattan distance should equal 9, but was %d", manHattanDistance(a, b))
+	}
+}

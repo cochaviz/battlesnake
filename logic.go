@@ -7,6 +7,7 @@ package main
 
 import (
 	"log"
+	"math"
 	"math/rand"
 )
 
@@ -34,7 +35,80 @@ func end(state GameState) {
 	log.Printf("%s END\n\n", state.Game.ID)
 }
 
-func getNextMove(safeMoves []string, state GameState) string {
+func intAbs(a int) int {
+	if a < 0 {
+		return -1 * a
+	}
+	return a
+}
+
+func manHattanDistance(a Coord, b Coord) int {
+	return intAbs(a.X-b.X) + intAbs(a.Y-b.Y)
+}
+
+func tryRemove(possibleMoves map[string]bool, move string) bool {
+	if move == "left" && (possibleMoves["right"] || possibleMoves["up"] || possibleMoves["down"]) {
+		possibleMoves["left"] = false
+		return true
+	}
+	if move == "right" && (possibleMoves["left"] || possibleMoves["up"] || possibleMoves["down"]) {
+		possibleMoves["right"] = false
+		return true
+	}
+	if move == "up" && (possibleMoves["right"] || possibleMoves["left"] || possibleMoves["down"]) {
+		possibleMoves["up"] = false
+		return true
+	}
+	if move == "down" && (possibleMoves["right"] || possibleMoves["up"] || possibleMoves["left"]) {
+		possibleMoves["down"] = false
+		return true
+	}
+	return false
+}
+
+func greedyMove(possibleMoves map[string]bool, state GameState, myHead Coord) {
+	var minDistance int = math.MaxInt
+	var minFood Coord
+
+	for _, food := range state.Board.Food {
+		var newDistance = manHattanDistance(myHead, food)
+
+		if newDistance < minDistance {
+			minFood = food
+			minDistance = newDistance
+		}
+	}
+
+	if minDistance != math.MaxInt {
+		log.Printf("Found food at distance %d", minDistance)
+		log.Printf("Current possibleMoves: %v", possibleMoves)
+
+		if minFood.X >= myHead.X {
+			if tryRemove(possibleMoves, "left") {
+				log.Printf("I'll try not to move left")
+			}
+		}
+		if minFood.X <= myHead.X {
+			if tryRemove(possibleMoves, "right") {
+				log.Printf("I'll try not to move right")
+			}
+			log.Printf("Current possibleMoves: %v", possibleMoves)
+		}
+		if minFood.Y >= myHead.Y {
+			if tryRemove(possibleMoves, "down") {
+				log.Printf("I'll try not to move down")
+			}
+		}
+		if minFood.Y <= myHead.Y {
+			if tryRemove(possibleMoves, "up") {
+				log.Printf("I'll try not to move up")
+			}
+		}
+		log.Printf("Current possibleMoves: %v", possibleMoves)
+	}
+}
+
+func randomMove(safeMoves []string) string {
 	return safeMoves[rand.Intn(len(safeMoves))]
 }
 
@@ -114,11 +188,9 @@ func move(state GameState) BattlesnakeMoveResponse {
 		checkAround(possibleMoves, myHead, others.Body)
 	}
 
-	// TODO: Step 4 - Find food.
-	// Use information in GameState to seek out and find food.
+	// Find food.
+	greedyMove(possibleMoves, state, myHead)
 
-	// Finally, choose a move from the available safe moves.
-	// TODO: Step 5 - Select a move to make based on strategy, rather than random.
 	var nextMove string
 
 	safeMoves := []string{}
@@ -130,9 +202,9 @@ func move(state GameState) BattlesnakeMoveResponse {
 
 	if len(safeMoves) == 0 {
 		nextMove = "down"
-		log.Printf("%s MOVE %d: No safe moves detected! Moving %s\n", state.Game.ID, state.Turn, nextMove)
+		log.Printf("%s MOVE %d: No safe moves detected! Moving down\n", state.Game.ID, state.Turn)
 	} else {
-		nextMove = getNextMove(safeMoves, state)
+		nextMove = randomMove(safeMoves)
 		log.Printf("%s MOVE %d: %s\n", state.Game.ID, state.Turn, nextMove)
 	}
 	return BattlesnakeMoveResponse{
