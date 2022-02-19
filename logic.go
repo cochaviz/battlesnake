@@ -46,7 +46,15 @@ func manHattanDistance(a Coord, b Coord) int {
 	return intAbs(a.X-b.X) + intAbs(a.Y-b.Y)
 }
 
-func tryRemove(possibleMoves map[string]bool, move string) bool {
+func removeMove(possibleMoves map[string]bool, move string, soft bool) {
+	if soft {
+		tryRemoveMove(possibleMoves, move)
+	} else {
+		possibleMoves[move] = false
+	}
+}
+
+func tryRemoveMove(possibleMoves map[string]bool, move string) bool {
 	if move == "left" && (possibleMoves["right"] || possibleMoves["up"] || possibleMoves["down"]) {
 		possibleMoves["left"] = false
 		return true
@@ -80,31 +88,23 @@ func greedyMove(possibleMoves map[string]bool, state GameState, myHead Coord) {
 	}
 
 	if minDistance != math.MaxInt {
-		log.Printf("Found food at distance %d", minDistance)
-		log.Printf("Current possibleMoves: %v", possibleMoves)
-
 		if minFood.X >= myHead.X {
-			if tryRemove(possibleMoves, "left") {
-				log.Printf("I'll try not to move left")
+			if tryRemoveMove(possibleMoves, "left") {
 			}
 		}
 		if minFood.X <= myHead.X {
-			if tryRemove(possibleMoves, "right") {
-				log.Printf("I'll try not to move right")
+			if tryRemoveMove(possibleMoves, "right") {
 			}
 			log.Printf("Current possibleMoves: %v", possibleMoves)
 		}
 		if minFood.Y >= myHead.Y {
-			if tryRemove(possibleMoves, "down") {
-				log.Printf("I'll try not to move down")
+			if tryRemoveMove(possibleMoves, "down") {
 			}
 		}
 		if minFood.Y <= myHead.Y {
-			if tryRemove(possibleMoves, "up") {
-				log.Printf("I'll try not to move up")
+			if tryRemoveMove(possibleMoves, "up") {
 			}
 		}
-		log.Printf("Current possibleMoves: %v", possibleMoves)
 	}
 }
 
@@ -112,26 +112,22 @@ func randomMove(safeMoves []string) string {
 	return safeMoves[rand.Intn(len(safeMoves))]
 }
 
-func checkAround(possibleMoves map[string]bool, myHead Coord, otherBody []Coord) {
-	for _, part := range otherBody {
+func checkAround(possibleMoves map[string]bool, myHead Coord, obstacle []Coord, soft bool) {
+	for _, part := range obstacle {
 		if myHead.Y == part.Y {
 			if myHead.X+1 == part.X {
-				possibleMoves["right"] = false
-				log.Print("Cannot move right\n")
+				removeMove(possibleMoves, "right", soft)
 			}
 			if myHead.X-1 == part.X {
-				possibleMoves["left"] = false
-				log.Print("Cannot move left\n")
+				removeMove(possibleMoves, "left", soft)
 			}
 		}
 		if myHead.X == part.X {
 			if myHead.Y+1 == part.Y {
-				possibleMoves["up"] = false
-				log.Print("Cannot move up\n")
+				removeMove(possibleMoves, "up", soft)
 			}
 			if myHead.Y-1 == part.Y {
-				possibleMoves["down"] = false
-				log.Print("Cannot move down\n")
+				removeMove(possibleMoves, "down", soft)
 			}
 		}
 	}
@@ -181,15 +177,19 @@ func move(state GameState) BattlesnakeMoveResponse {
 	}
 
 	// Don't hit yourself.
-	checkAround(possibleMoves, myHead, myTail)
+	checkAround(possibleMoves, myHead, myTail, false)
 
 	// Don't hit others.
 	for _, others := range state.Board.Snakes {
-		checkAround(possibleMoves, myHead, others.Body)
+		checkAround(possibleMoves, myHead, others.Body, false)
 	}
 
 	// Find food.
-	greedyMove(possibleMoves, state, myHead)
+	if state.You.Health < 25 {
+		greedyMove(possibleMoves, state, myHead)
+	} else {
+		checkAround(possibleMoves, myHead, state.Board.Food, true)
+	}
 
 	var nextMove string
 
