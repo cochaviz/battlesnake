@@ -1,0 +1,71 @@
+package internal
+
+import (
+	"battlesnake/internal/utils"
+	"battlesnake/pkg/api"
+	"testing"
+)
+
+func TestNeckAvoidance(t *testing.T) {
+	// Arrange
+	me := api.Battlesnake{
+		// Length 3, facing right
+		Head: api.Coord{X: 2, Y: 0},
+		Body: []api.Coord{{X: 2, Y: 0}, {X: 1, Y: 0}, {X: 0, Y: 0}},
+	}
+	state := api.GameState{
+		Board: api.Board{
+			Snakes: []api.Battlesnake{me},
+		},
+		You: me,
+	}
+
+	// Act 1,000x (this isn't a great way to test, but it's okay for starting out)
+	for i := 0; i < 1000; i++ {
+		nextMove := Move(state)
+		// Assert never move left
+		if nextMove.Move == "left" {
+			t.Errorf("snake moved onto its own neck, %s", nextMove.Move)
+		}
+	}
+}
+
+func TestBodyAvoidance(t *testing.T) {
+	// Arrange
+	me := api.Battlesnake{
+		Head: api.Coord{X: 8, Y: 1},
+		Body: []api.Coord{{X: 7, Y: 1}, {X: 7, Y: 0}, {X: 8, Y: 0}, {X: 9, Y: 0}},
+	}
+	state := api.GameState{
+		Board: api.Board{
+			Snakes: []api.Battlesnake{me},
+		},
+		You: me,
+	}
+	nextMove := Move(state)
+	// Assert never move left
+	if nextMove.Move == "left" {
+		t.Errorf("snake moved onto its own neck, %s", nextMove.Move)
+	}
+	if nextMove.Move == "down" {
+		t.Errorf("snake moved onto its own body, %s", nextMove.Move)
+	}
+}
+
+func TestManhattan(t *testing.T) {
+	a := api.Coord{X: 5, Y: 10}
+	b := api.Coord{X: 1, Y: 5}
+
+	if utils.ManHattanDistance(a, b) != 9 {
+		t.Errorf("manhattan distance should equal 9, but was %d", utils.ManHattanDistance(a, b))
+	}
+}
+
+func TestCountSpace(t *testing.T) {
+	initial := api.Coord{X: 1, Y: 1}
+	obstacles := []api.Coord{{X: 0, Y: 3}, {X: 1, Y: 3}, {X: 2, Y: 3}, {X: 3, Y: 3}, {X: 3, Y: 2}, {X: 3, Y: 1}, {X: 3, Y: 0}}
+
+	if utils.CountSpace(initial, obstacles, 4, 4) != 9 {
+		t.Errorf("space in a 3x3 square should be 9, but was %d", utils.CountSpace(initial, obstacles, 4, 4))
+	}
+}

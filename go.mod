@@ -1,4 +1,4 @@
-module github.com/zoharcochavi/battlesnake
+module battlesnake
 
 // +heroku goVersion go1.17
 go 1.17
