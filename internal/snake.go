@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"battlesnake/internal/data"
 	"battlesnake/pkg/api"
 	"log"
 )
@@ -29,7 +30,14 @@ func End(state api.GameState) {
 
 // This function is called on every turn of a game. Use the provided GameState to decide
 func Move(state api.GameState) api.BattlesnakeMoveResponse {
+	nextMove, err := Think(*data.ConvertFrom(state))
+
+	if err != nil {
+		log.Printf("%s MOVE %d: No safe moves detected! Moving %s\n", state.Game.ID, state.Turn, nextMove)
+	} else {
+		log.Printf("%s MOVE %d: %s\n", state.Game.ID, state.Turn, nextMove)
+	}
 	return api.BattlesnakeMoveResponse{
-		Move: Think(state),
+		Move: nextMove,
 	}
 }

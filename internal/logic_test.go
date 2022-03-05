@@ -60,12 +60,3 @@ func TestManhattan(t *testing.T) {
 		t.Errorf("manhattan distance should equal 9, but was %d", utils.ManHattanDistance(a, b))
 	}
 }
-
-func TestCountSpace(t *testing.T) {
-	initial := api.Coord{X: 1, Y: 1}
-	obstacles := []api.Coord{{X: 0, Y: 3}, {X: 1, Y: 3}, {X: 2, Y: 3}, {X: 3, Y: 3}, {X: 3, Y: 2}, {X: 3, Y: 1}, {X: 3, Y: 0}}
-
-	if utils.CountSpace(initial, obstacles, 4, 4) != 9 {
-		t.Errorf("space in a 3x3 square should be 9, but was %d", utils.CountSpace(initial, obstacles, 4, 4))
-	}
-}
