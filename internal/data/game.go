@@ -83,7 +83,7 @@ func (state GameState) onFood() bool {
 }
 
 func (state GameState) IsTerminal() bool {
-	return len(state.moves) == 0
+	return state.You.Health == 0 || len(state.moves) == 0
 }
 
 func (state GameState) Move(move string) (*GameState, error) {
@@ -107,12 +107,13 @@ func (state GameState) Move(move string) (*GameState, error) {
 	nextState.You.Head = newHead
 	nextState.You.Body = append([]api.Coord{nextState.You.Head}, nextState.You.Body...)
 
-	// TODO Update health
 	if !nextState.onFood() {
 		nextState.You.Body[len(nextState.You.Body)-1] = api.Coord{}
 		nextState.You.Body = nextState.You.Body[:len(nextState.You.Body)-1]
+		nextState.You.Health = 100
 	} else {
 		nextState.You.Length++
+		nextState.You.Health--
 	}
 	nextState.updateMoves()
 

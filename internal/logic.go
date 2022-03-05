@@ -48,7 +48,7 @@ func greedyMove(state data.GameState) []string {
 }
 
 func Think(state data.GameState) (string, error) {
-	solution, _ := solver.Dfs(state, 15)
+	solution, _ := solver.Dfs(state, 12)
 
 	if len(solution) == 0 {
 		return "down", errors.New("Could not find a legal move")
