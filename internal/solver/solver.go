@@ -49,9 +49,9 @@ func maxLength(state data.GameState) int32 {
 }
 
 func cost(state data.GameState) int32 {
-	return maxDistanceFromOthers(state) +
-		10*minLength(state) +
-		minDistanceToTail(state) +
+	return minDistanceToTail(state) +
+		minLength(state) +
+		maxDistanceFromOthers(state) +
 		dislikeWalls(state, 5)
 }
 
@@ -62,8 +62,8 @@ func Dfs(state data.GameState, depth int) ([]string, int32) {
 	if depth == 0 || state.IsTerminal() {
 		return bestPath, terminalPenalty(state)
 	}
+	lowestCost := int32(math.MaxInt32)
 	currentCost := cost(state)
-	lowestCost := int32(math.MaxInt32) / 2
 
 	for _, move := range state.SafeMoves() {
 		nextState, _ := state.Move(move)

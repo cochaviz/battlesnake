@@ -63,6 +63,7 @@ func Move(state api.GameState) api.BattlesnakeMoveResponse {
 
 func think(state data.GameState) (string, error) {
 	solution, _ := solver.Dfs(state, 10)
+	log.Print(state.You.Length)
 
 	if len(solution) == 0 {
 		return "down", errors.New("Could not find a legal move")
