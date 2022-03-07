@@ -49,9 +49,8 @@ func maxLength(state data.GameState) int32 {
 }
 
 func cost(state data.GameState) int32 {
-	return minDistanceToTail(state) +
-		minLength(state) +
-		maxDistanceFromOthers(state) +
+	return maxDistanceFromOthers(state) +
+		maxLength(state) +
 		dislikeWalls(state, 5)
 }
 
