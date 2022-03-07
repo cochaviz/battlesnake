@@ -8,6 +8,8 @@ import (
 	"math"
 )
 
+// TODO Add heuristic for distance to other snake heads
+
 // This function removes moves that will get the snake further away from food if there are other options
 func greedyMove(state data.GameState) []string {
 	head := state.You.Head
@@ -56,8 +58,9 @@ func minLength(state data.GameState) int32 {
 func maxLength(state data.GameState) int32 {
 	if state.IsTerminal() {
 		return math.MaxInt32 - int32(state.Turn)
+
 	}
-	return -state.You.Length - int32(state.Turn)
+	return -state.You.Length - int32(state.Turn) + state.You.Health
 }
 
 // Will try to find the longest path which is not terminal
@@ -65,7 +68,7 @@ func Dfs(state data.GameState, depth int) ([]string, int32) {
 	bestPath := []string{}
 
 	if depth == 0 || state.IsTerminal() {
-		return bestPath, maxLength(state)
+		return bestPath, minLength(state)
 	}
 	var lowestCost int32
 	lowestCost = math.MaxInt32
