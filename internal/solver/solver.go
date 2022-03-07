@@ -8,44 +8,16 @@ import (
 	"math"
 )
 
-// TODO Add heuristic for distance to other snake heads
-
-// This function removes moves that will get the snake further away from food if there are other options
-func greedyMove(state data.GameState) []string {
-	head := state.You.Head
-	possibleMoves := state.PossibleMoves()
-
-	minDistance := math.MaxInt
-	minFood := api.Coord{}
-
-	for _, food := range state.Board.Food {
-		var newDistance = utils.ManHattanDistance(head, food)
-
-		if newDistance < minDistance {
-			minFood = food
-			minDistance = newDistance
-		}
+func maxDistanceFromOthers(state data.GameState) int32 {
+	if state.IsTerminal() {
+		return math.MaxInt32 - int32(state.Turn)
 	}
+	totalDistance := int32(0)
 
-	if minDistance != math.MaxInt {
-		if minFood.X >= head.X {
-			if utils.TryRemoveMove(possibleMoves, "left") {
-			}
-		}
-		if minFood.X <= head.X {
-			if utils.TryRemoveMove(possibleMoves, "right") {
-			}
-		}
-		if minFood.Y >= head.Y {
-			if utils.TryRemoveMove(possibleMoves, "down") {
-			}
-		}
-		if minFood.Y <= head.Y {
-			if utils.TryRemoveMove(possibleMoves, "up") {
-			}
-		}
+	for _, snake := range state.OtherSnakes {
+		totalDistance += int32(utils.ManHattanDistance(state.You.Head, snake.Head))
 	}
-	return utils.SafeMoves(possibleMoves)
+	return totalDistance - int32(state.Turn) + state.You.Health + state.You.Length
 }
 
 func minLength(state data.GameState) int32 {
@@ -68,7 +40,7 @@ func Dfs(state data.GameState, depth int) ([]string, int32) {
 	bestPath := []string{}
 
 	if depth == 0 || state.IsTerminal() {
-		return bestPath, minLength(state)
+		return bestPath, maxDistanceFromOthers(state)
 	}
 	var lowestCost int32
 	lowestCost = math.MaxInt32
