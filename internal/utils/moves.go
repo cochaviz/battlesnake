@@ -5,6 +5,23 @@ import (
 	"errors"
 )
 
+func MoveCoord(place api.Coord, move string) api.Coord {
+	next := place
+
+	// Update head
+	switch move {
+	case "left":
+		next.X -= 1
+	case "right":
+		next.X += 1
+	case "down":
+		next.Y -= 1
+	case "up":
+		next.Y += 1
+	}
+	return next
+}
+
 func AllMoves(possible bool) map[string]bool {
 	return map[string]bool{
 		"up":    possible,

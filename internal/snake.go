@@ -2,7 +2,10 @@ package internal
 
 import (
 	"battlesnake/internal/data"
+	"battlesnake/internal/solver"
+	"battlesnake/internal/utils"
 	"battlesnake/pkg/api"
+	"errors"
 	"log"
 )
 
@@ -29,8 +32,8 @@ func End(state api.GameState) {
 }
 
 // This function is called on every turn of a game. Use the provided GameState to decide
-func Move(state api.GameState) api.BattlesnakeMoveResponse {
-	nextMove, err := Think(*data.ConvertFrom(state))
+func Move(state api.GameState) (api.BattlesnakeMoveResponse, utils.Measurement) {
+	nextMove, err := think(*data.ConvertFrom(state))
 
 	if err != nil {
 		log.Printf("%s MOVE %d: No safe moves detected! Moving %s\n", state.Game.ID, state.Turn, nextMove)
@@ -39,5 +42,14 @@ func Move(state api.GameState) api.BattlesnakeMoveResponse {
 	}
 	return api.BattlesnakeMoveResponse{
 		Move: nextMove,
+	}, utils.Measurement{}
+}
+
+func think(state data.GameState) (string, error) {
+	solution, _ := solver.Dfs(state, 11)
+
+	if len(solution) == 0 {
+		return "down", errors.New("Could not find a legal move")
 	}
+	return solution[0], nil
 }

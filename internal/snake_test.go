@@ -22,7 +22,7 @@ func TestNeckAvoidance(t *testing.T) {
 
 	// Act 1,000x (this isn't a great way to test, but it's okay for starting out)
 	for i := 0; i < 1000; i++ {
-		nextMove := Move(state)
+		nextMove, _ := Move(state)
 		// Assert never move left
 		if nextMove.Move == "left" {
 			t.Errorf("snake moved onto its own neck, %s", nextMove.Move)
@@ -42,7 +42,7 @@ func TestBodyAvoidance(t *testing.T) {
 		},
 		You: me,
 	}
-	nextMove := Move(state)
+	nextMove, _ := Move(state)
 	// Assert never move left
 	if nextMove.Move == "left" {
 		t.Errorf("snake moved onto its own neck, %s", nextMove.Move)

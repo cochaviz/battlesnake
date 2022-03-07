@@ -3,11 +3,13 @@ package data
 import (
 	"battlesnake/internal/utils"
 	"battlesnake/pkg/api"
+	"container/list"
 	"errors"
 	"log"
 )
 
 type GameState struct {
+	Turn        int
 	Board       api.Board
 	OtherSnakes []api.Battlesnake
 	You         api.Battlesnake
@@ -46,18 +48,14 @@ func (state *GameState) Init() {
 
 func (state GameState) Copy() *GameState {
 	newState := new(GameState)
-
-	newState.Board = state.Board
-	newState.You = state.You
-	newState.OtherSnakes = state.OtherSnakes
-	newState.moves = state.moves
-
+	*newState = state
 	return newState
 }
 
 func ConvertFrom(state api.GameState) *GameState {
 	newState := new(GameState)
 
+	newState.Turn = state.Turn
 	newState.Board = state.Board
 	newState.You = state.You
 	newState.Init()
@@ -71,6 +69,42 @@ func (state GameState) PossibleMoves() map[string]bool {
 
 func (state GameState) SafeMoves() []string {
 	return state.moves
+}
+
+func (state GameState) CountSpace() int32 {
+	// snakes are obstacles
+	obstacles := append(state.You.Body)
+	for _, snake := range state.OtherSnakes {
+		obstacles = append(obstacles, snake.Body...)
+	}
+	freeSpace := list.New()
+	spaceCount := int32(0)
+	freeSpace.Init()
+
+	// start with the head
+	freeSpace.PushBack(state.You.Head)
+
+	for {
+		if freeSpace.Len() == 0 {
+			break
+		}
+		currentSpace := freeSpace.Front().Value.(api.Coord)
+		possibleMoves := utils.AllMoves(true)
+		mockSnake := api.Battlesnake{Head: currentSpace}
+
+		utils.AvoidWalls(possibleMoves, mockSnake, state.Board)
+		utils.AvoidObstacles(possibleMoves, mockSnake, obstacles, false)
+
+		for _, move := range utils.SafeMoves(possibleMoves) {
+			freeSpace.PushBack(utils.MoveCoord(currentSpace, move))
+		}
+		obstacles = append(obstacles, currentSpace)
+		spaceCount++
+	}
+	// Because we shouldn't count the head
+	spaceCount--
+
+	return spaceCount
 }
 
 func (state GameState) onFood() bool {
@@ -91,20 +125,7 @@ func (state GameState) Move(move string) (*GameState, error) {
 		return &state, errors.New("State is terminal")
 	}
 	nextState := state.Copy()
-	newHead := api.Coord{X: nextState.You.Head.X, Y: nextState.You.Head.Y}
-
-	// Update head
-	switch move {
-	case "left":
-		newHead.X -= 1
-	case "right":
-		newHead.X += 1
-	case "down":
-		newHead.Y -= 1
-	case "up":
-		newHead.Y += 1
-	}
-	nextState.You.Head = newHead
+	nextState.You.Head = utils.MoveCoord(nextState.You.Head, move)
 	nextState.You.Body = append([]api.Coord{nextState.You.Head}, nextState.You.Body...)
 
 	if !nextState.onFood() {

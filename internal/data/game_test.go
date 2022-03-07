@@ -137,3 +137,28 @@ func TestMoveFood(t *testing.T) {
 		t.Errorf("State should be terminal, but there were possible moves: %s", newState.SafeMoves())
 	}
 }
+
+func TestCountSpace(t *testing.T) {
+	// Arrange
+	me := api.Battlesnake{
+		// Length 3, facing right
+		Head: api.Coord{X: 1, Y: 0},
+		Body: []api.Coord{{X: 1, Y: 0}, {X: 1, Y: 1}, {X: 0, Y: 1}},
+	}
+	state := GameState{
+		Board: api.Board{
+			Food:   []api.Coord{{X: 0, Y: 0}},
+			Snakes: []api.Battlesnake{me},
+			Width:  3,
+			Height: 3,
+		},
+		You: me,
+	}
+	state.Init()
+
+	log.Print("Running test...")
+
+	if state.CountSpace() != 6 {
+		t.Error("Should have counted 6 spaces, but found:", state.CountSpace())
+	}
+}
