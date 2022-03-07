@@ -8,18 +8,20 @@ import (
 	"os"
 )
 
+const outputFolder = "results/"
+
 type Measurement struct {
 	Turn   int `csv:"Turn"`
 	Length int `csv:"Length"`
 }
 
 func (measurement Measurement) AppendToFile(filename string) error {
-	f, err := os.OpenFile(filename, os.O_APPEND|os.O_WRONLY, 0644)
+	f, err := os.OpenFile(outputFolder+filename, os.O_APPEND|os.O_WRONLY, 0644)
 
 	if err != nil {
 		log.Println(err, "Trying to create file")
 
-		f, err = os.Create(filename)
+		f, err = os.Create(outputFolder + filename)
 		if err != nil {
 			return err
 		}
@@ -32,7 +34,7 @@ func (measurement Measurement) AppendToFile(filename string) error {
 }
 
 func ReadFromFile(filename string) ([]Measurement, error) {
-	f, err := os.OpenFile(filename, os.O_RDONLY, 664)
+	f, err := os.OpenFile(outputFolder+filename, os.O_RDONLY, 664)
 
 	if err != nil {
 		return []Measurement{}, err
@@ -64,7 +66,7 @@ func PlotMeasurements(inputFilename string, outputFilename string) {
 		return
 	}
 	p.Add(scatter)
-	err = p.Save(500, 300, outputFilename)
+	err = p.Save(500, 300, outputFolder+outputFilename)
 
 	if err != nil {
 		log.Print(err)
