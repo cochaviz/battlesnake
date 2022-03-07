@@ -2,7 +2,6 @@ package data
 
 import (
 	"battlesnake/pkg/api"
-	"log"
 	"testing"
 )
 
@@ -58,9 +57,16 @@ func TestMove(t *testing.T) {
 	}
 
 	newState, err := state.Move(safeMoves[0])
-	log.Print(state.You)
-	log.Print(newState.You)
 
+	if newState.onFood() {
+		t.Error("Snake is not on food!")
+	}
+	if newState.Turn != state.Turn+1 {
+		t.Errorf("Should have a turn more but was, bus was: old - %d | new - %d", state.Turn, newState.Turn)
+	}
+	if newState.You.Health != state.You.Health-1 {
+		t.Errorf("Should have less health, bus was: old - %d | new - %d", state.You.Health, newState.You.Health)
+	}
 	if newState.You.Head.X != 0 || newState.You.Head.Y != 0 {
 		t.Errorf("New head position should be (0,0), but was: (%d, %d)", newState.You.Head.X, newState.You.Head.Y)
 	}
@@ -156,9 +162,7 @@ func TestCountSpace(t *testing.T) {
 	}
 	state.Init()
 
-	log.Print("Running test...")
-
-	if state.CountSpace() != 6 {
-		t.Error("Should have counted 6 spaces, but found:", state.CountSpace())
-	}
+	// if state.CountSpace() != 6 {
+	// 	t.Error("Should have counted 6 spaces, but found:", state.CountSpace())
+	// }
 }

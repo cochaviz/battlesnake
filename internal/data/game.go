@@ -128,12 +128,12 @@ func (state GameState) Move(move string) (*GameState, error) {
 	nextState.You.Head = utils.MoveCoord(nextState.You.Head, move)
 	nextState.You.Body = append([]api.Coord{nextState.You.Head}, nextState.You.Body...)
 
-	if !nextState.onFood() {
-		nextState.You.Body[len(nextState.You.Body)-1] = api.Coord{}
-		nextState.You.Body = nextState.You.Body[:len(nextState.You.Body)-1]
+	if nextState.onFood() {
 		nextState.You.Health = 100
 		nextState.You.Length++
 	} else {
+		nextState.You.Body[len(nextState.You.Body)-1] = api.Coord{}
+		nextState.You.Body = nextState.You.Body[:len(nextState.You.Body)-1]
 		nextState.You.Health--
 	}
 	nextState.Turn++
