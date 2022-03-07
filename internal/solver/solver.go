@@ -3,7 +3,6 @@ package solver
 import (
 	"battlesnake/internal/data"
 	"battlesnake/internal/utils"
-	"battlesnake/pkg/api"
 	"log"
 	"math"
 )
