@@ -33,7 +33,7 @@ func maxDistanceFromOthers(state data.GameState) int32 {
 	for _, snake := range state.OtherSnakes {
 		totalDistance += int32(utils.ManHattanDistance(state.You.Head, snake.Head))
 	}
-	return totalDistance
+	return -totalDistance
 }
 
 func minHealth(state data.GameState) int32 {
