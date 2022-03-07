@@ -117,7 +117,7 @@ func (state GameState) onFood() bool {
 }
 
 func (state GameState) IsTerminal() bool {
-	return state.You.Health == 0 || len(state.moves) == 0
+	return state.You.Health == 1 || len(state.moves) == 0
 }
 
 func (state GameState) Move(move string) (*GameState, error) {
