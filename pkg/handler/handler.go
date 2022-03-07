@@ -41,7 +41,7 @@ func HandleMove(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response, _ := internal.Move(state)
+	response := internal.Move(state)
 
 	w.Header().Set("Content-Type", "application/json")
 	err = json.NewEncoder(w).Encode(response)

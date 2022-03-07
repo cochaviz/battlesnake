@@ -1,38 +1,72 @@
 package utils
 
 import (
-	"encoding/json"
-	"fmt"
+	"github.com/gocarina/gocsv"
+	"gonum.org/v1/plot"
+	"gonum.org/v1/plot/plotter"
 	"log"
 	"os"
 )
 
-type Data struct {
-	Turn   []int
-	Length []int
+type Measurement struct {
+	Turn   int `csv:"Turn"`
+	Length int `csv:"Length"`
 }
 
-// TODO Make this just better
-func (data Data) appendMeasuremen(measurement Measurement) {
-	data.Turn = append(data.Turn, measurement.Turn)
-	data.Length = append(data.Length, measurement.Length)
-}
-
-func (data Data) WriteToFile(filename string) {
+func (measurement Measurement) AppendToFile(filename string) error {
 	f, err := os.OpenFile(filename, os.O_APPEND|os.O_WRONLY, 0644)
 
 	if err != nil {
 		log.Println(err, "Trying to create file")
+
 		f, err = os.Create(filename)
+		if err != nil {
+			return err
+		}
+		return gocsv.MarshalFile([]Measurement{measurement}, f)
 	}
 	if err != nil {
 		log.Println(err)
 	}
-	jsonEncoded, _ := json.MarshalIndent(data, "", " ")
-	fmt.Fprintln(f, string(jsonEncoded), ",")
+	return gocsv.MarshalCSVWithoutHeaders([]Measurement{measurement}, gocsv.DefaultCSVWriter(f))
 }
 
-type Measurement struct {
-	Turn   int
-	Length int
+func ReadFromFile(filename string) ([]Measurement, error) {
+	f, err := os.OpenFile(filename, os.O_RDONLY, 664)
+
+	if err != nil {
+		return []Measurement{}, err
+	}
+	var measurements = []Measurement{}
+	return measurements, gocsv.UnmarshalFile(f, &measurements)
+}
+
+func PlotMeasurements(inputFilename string, outputFilename string) {
+	measurements, err := ReadFromFile(inputFilename)
+
+	if err != nil {
+		log.Print(err)
+		return
+	}
+	p := plot.New()
+
+	var values plotter.XYs
+
+	for _, measurement := range measurements {
+		values = append(values, plotter.XY{Y: float64(measurement.Length), X: float64(measurement.Turn)})
+	}
+	p.Title.Text = "Length over time"
+
+	scatter, err := plotter.NewLine(values)
+
+	if err != nil {
+		log.Print(err)
+		return
+	}
+	p.Add(scatter)
+	err = p.Save(500, 300, outputFilename)
+
+	if err != nil {
+		log.Print(err)
+	}
 }

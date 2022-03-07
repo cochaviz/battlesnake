@@ -132,10 +132,11 @@ func (state GameState) Move(move string) (*GameState, error) {
 		nextState.You.Body[len(nextState.You.Body)-1] = api.Coord{}
 		nextState.You.Body = nextState.You.Body[:len(nextState.You.Body)-1]
 		nextState.You.Health = 100
-	} else {
 		nextState.You.Length++
+	} else {
 		nextState.You.Health--
 	}
+	nextState.Turn++
 	nextState.updateMoves()
 
 	return nextState, nil
