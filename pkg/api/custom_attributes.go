@@ -69,20 +69,22 @@ func GetCustomAttributesFromGameState(state GameState) (CustomAttributes, error)
 	customAttributes["snakeData"] = encodedSnakeData
 
 	// -- Opponent properties
+	opponentNumber := 1
 
-	for index, snake := range state.Board.Snakes {
+	for _, snake := range state.Board.Snakes {
 		if snake.ID != state.You.ID {
-			customAttributes[fmt.Sprintf("snakeOpponent_%d_snakeId", index)] = snake.ID
-			customAttributes[fmt.Sprintf("snakeOpponent_%d_snakeHealth", index)] = snake.Health
-			customAttributes[fmt.Sprintf("snakeOpponent_%d_snakeLength", index)] = snake.Length
-			customAttributes[fmt.Sprintf("snakeOpponent_%d_snakeName", index)] = snake.Name
+			customAttributes[fmt.Sprintf("snakeOpponent_%d_Id", opponentNumber)] = snake.ID
+			customAttributes[fmt.Sprintf("snakeOpponent_%d_Health", opponentNumber)] = snake.Health
+			customAttributes[fmt.Sprintf("snakeOpponent_%d_Length", opponentNumber)] = snake.Length
+			customAttributes[fmt.Sprintf("snakeOpponent_%d_Name", opponentNumber)] = snake.Name
 
 			// Encode to json, and then base64
 			encodedSnakeData, err := base64Json(snakeDataFrom(snake))
 			if err != nil {
 				return CustomAttributes{}, err
 			}
-			customAttributes[fmt.Sprintf("snakeOpponent_%d_snakeData", index)] = encodedSnakeData
+			customAttributes[fmt.Sprintf("snakeOpponent_%d_Data", opponentNumber)] = encodedSnakeData
+			opponentNumber++
 		}
 	}
 	return customAttributes, nil
