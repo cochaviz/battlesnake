@@ -3,11 +3,9 @@ package internal
 import (
 	"battlesnake/internal/data"
 	"battlesnake/internal/solver"
-	"battlesnake/internal/utils"
 	"battlesnake/pkg/api"
 	"errors"
 	"log"
-	"os"
 )
 
 func Info() api.BattlesnakeInfoResponse {
@@ -30,11 +28,6 @@ func Start(state api.GameState) {
 // This function is called when a game your Battlesnake was in has ended.
 func End(state api.GameState) {
 	log.Printf("%s END\n\n", state.Game.ID)
-
-	if os.Getenv("ANALYSIS") != "" {
-		log.Println("Writing anaylsis...")
-		utils.PlotMeasurements("test-"+state.Game.ID+".csv", "test-"+state.Game.ID+".png")
-	}
 }
 
 // This function is called on every turn of a game. Use the provided GameState to decide
@@ -44,17 +37,8 @@ func Move(state api.GameState) api.BattlesnakeMoveResponse {
 	if err != nil {
 		log.Printf("%s MOVE %d: No safe moves detected! Moving %s\n", state.Game.ID, state.Turn, nextMove)
 
-		if os.Getenv("ANALYSIS") != "" {
-			log.Println("Writing anaylsis...")
-			utils.PlotMeasurements("test-"+state.Game.ID+".csv", "test-"+state.Game.ID+".png")
-		}
 	} else {
 		log.Printf("%s MOVE %d: %s\n", state.Game.ID, state.Turn, nextMove)
-
-		if os.Getenv("ANALYSIS") != "" {
-			measurement := utils.Measurement{Turn: state.Turn, Length: int(state.You.Length)}
-			measurement.AppendToFile("test-" + state.Game.ID + ".csv")
-		}
 	}
 	return api.BattlesnakeMoveResponse{
 		Move: nextMove,
